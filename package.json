@@ -1,0 +1,21 @@
+{
+  "name": "Projeto2Fastify",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "",
+    "dev": "tsx  watch src/server.ts",
+    "lint": "eslint src -e .ts"
+  },
+  "devDependencies": {
+    "@rocketseat/eslint-config": "^1.2.0",
+    "@types/node": "^18.14.1",
+    "eslint": "^8.34.0",
+    "tsx": "^3.12.3",
+    "typescript": "^4.9.5"
+  },
+  "dependencies": {
+    "fastify": "^4.13.0"
+  }
+}
