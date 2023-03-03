@@ -5,15 +5,10 @@ import { transactionsRoutes } from './routes/transactions'
 
 const app = fastify({ logger: true })
 
-app.get('/hello', async () => {
-  const transaction = await knex('transaction')
-    .where('amount', 1000)
-    .select('*')
-
-  return transaction
+app.register(transactionsRoutes, {
+  prefix: '/transactions',
 })
-app.register(transactionsRoutes)
-
+app.register(knex)
 app.listen({ port: env.PORT }).then(() => {
   console.log('HTTP Server Running!')
 })
