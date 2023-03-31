@@ -1,8 +1,17 @@
-import { test, beforeAll, afterAll, describe, it } from 'vitest'
-import request from 'supertest'
+import {
+  test,
+  beforeAll,
+  afterAll,
+  describe,
+  it,
+  expect,
+  beforeEach,
+} from 'vitest'
 import { app } from '../src/server'
+import request from 'supertest'
+import { execSync } from 'child_process'
 
-describe('Transactions', () => {
+describe('Transactions routes', () => {
   beforeAll(async () => {
     await app.ready()
   })
@@ -11,6 +20,10 @@ describe('Transactions', () => {
     await app.close()
   })
 
+  beforeEach(() => {
+    execSync('npm run knex migrate:rollback --all')
+    execSync('npm run knex migrate:latest')
+  })
   test('User can create a new transaction', async () => {
     await request(app.server)
       .post('/transactions')
@@ -30,11 +43,18 @@ describe('Transactions', () => {
         type: 'credit',
       })
 
-    const cookies = createTransactionResponse.headers('set-cookie')
+    const cookies = createTransactionResponse.get('set-cookie')
 
-    await request(app.server)
+    const listTransactionsResponse = await request(app.server)
       .get('/transactions')
       .set('Cookie', cookies)
       .expect(200)
+
+    expect(listTransactionsResponse.body.transactions).toEqual([
+      expect.objectContaining({
+        title: 'New transaction',
+        amount: 5000,
+      }),
+    ])
   })
 })
