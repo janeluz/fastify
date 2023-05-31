@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // eslint - disable - next - line
 import { knex } from 'knex'
 

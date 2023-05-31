@@ -5,7 +5,6 @@ import { knex } from '../database'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
 // cookies <--> Forma de armazenar informações no navegador do usuário
-
 export async function transactionsRoutes(app: FastifyInstance) {
   app.get(
     '/',
@@ -14,6 +13,7 @@ export async function transactionsRoutes(app: FastifyInstance) {
     },
     async (request) => {
       const { sessionId } = request.cookies
+
       const transactions = await knex('transactions')
         .where('session_id', sessionId)
         .select()
@@ -28,19 +28,24 @@ export async function transactionsRoutes(app: FastifyInstance) {
       preHandler: [checkSessionIdExists],
     },
     async (request) => {
-      const getTransactionParamsSchema = z.object({
+      const getTransactionsParamsSchema = z.object({
         id: z.string().uuid(),
       })
-      const { id } = getTransactionParamsSchema.parse(request.params)
+
+      const { id } = getTransactionsParamsSchema.parse(request.params)
+
       const { sessionId } = request.cookies
 
       const transaction = await knex('transactions')
         .where({
-          id,
           session_id: sessionId,
+          id,
         })
         .first()
-      return { transaction }
+
+      return {
+        transaction,
+      }
     },
   )
 
@@ -53,11 +58,13 @@ export async function transactionsRoutes(app: FastifyInstance) {
     },
     async (request) => {
       const { sessionId } = request.cookies
-      const transactions = await knex('transactions')
+
+      const summary = await knex('transactions')
         .where('session_id', sessionId)
-        .sum('amount as amount') // o as amount é para colocar o nome na coluna
+        .sum('amount', { as: 'amount' }) // o as amount é para colocar o nome na coluna
         .first()
-      return { transactions }
+
+      return { summary }
     },
   )
 
@@ -71,19 +78,25 @@ export async function transactionsRoutes(app: FastifyInstance) {
     const { title, amount, type } = createTransactionBodySchema.parse(
       request.body,
     )
+
     let sessionId = request.cookies.sessionId
+
     if (!sessionId) {
       sessionId = randomUUID()
-      reply.cookie('sessionId', sessionId, {
+
+      reply.setCookie('sessionId', sessionId, {
         path: '/',
-        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 dias
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       })
     }
+
     await knex('transactions').insert({
       id: randomUUID(),
       title,
       amount: type === 'credit' ? amount : amount * -1, // se for do tipo crédito utiliza do jeito que está, se for do tipo débito multiplica por -1
+      session_id: sessionId,
     })
+
     return reply.status(201).send()
   })
 }
