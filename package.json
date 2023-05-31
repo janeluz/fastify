@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "engines":{
-    "node":">= 18"
+  "engines": {
+    "node": ">= 18"
   },
   "scripts": {
     "start": "",
     "dev": "tsx watch src/server.ts",
     "build": "tsup src --out-dir build",
-    "knex": "node --loader tsx ./node_modules/knex/bin/cli.js",
+    "knex": "node --no-warnings --loader tsx ./node_modules/.bin/knex",
     "lint": "eslint src --ext .ts --fix",
     "test": "vitest"
   },
@@ -31,6 +31,7 @@
     "knex": "^2.4.2",
     "pg": "^8.11.0",
     "sqlite3": "^5.1.4",
+    "tsup": "^6.7.0",
     "zod": "^3.20.6"
   }
 }
